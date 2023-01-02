@@ -1,0 +1,16 @@
+@model VendasWebMvc.Models.Department
+@{
+    ViewData["Title"] = "Departmentos";
+}
+<h2>Departmentos</h2>
+<hr />
+<div class="row">
+<dl class="dl-horizontal">
+    <dt>@Html.DisplayNameFor(model => model.Name)</dt>
+    <dt>@Html.DisplayFor(model => model.Name)</dt>
+</dl>
+</div>
+<div>
+    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Editar</a>
+    <a asp-action="Index" class="btn btn-defaul">Voltar</a>
+</div>

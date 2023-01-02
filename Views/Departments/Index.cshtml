@@ -1,0 +1,31 @@
+@model IEnumerable<VendasWebMvc.Models.Department>
+@{
+    ViewData["Title"] = "Departmentos";
+}
+<h2>Departmentos</h2>
+<p> <a asp-action="Create">Criar Novo</a> </p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Name)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItens => item.Name)
+                </td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-primary">Editar</a>
+                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-success">Detalhe</a>
+                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger">Excluir</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

@@ -1,0 +1,19 @@
+@model VendasWebMvc.Models.Department
+@{
+    ViewData["Title"] = "Departmentos";
+}
+<h2>@ViewData["Title"]</h2>
+<hr />
+<div class="row">
+<dl class="dl-horizontal">
+    <dt>@Html.DisplayNameFor(model => model.Name)</dt>
+    <dt>@Html.DisplayFor(model => model.Name)</dt>
+</dl>
+</div>
+<div>
+    <form asp-action="Delete">
+        <input type="hidden" asp-for="Id" />
+        <input type="submit" value="Excluir" class="btn btn-danger" />
+        <a asp-action="Index" class="btn btn-defaul">Voltar</a>
+    </form>
+</div>

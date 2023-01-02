@@ -1,6 +1,4 @@
-﻿using System.Diagnostics;
-using Microsoft.AspNetCore.Mvc;
-using VendasWebMvc.Models;
+﻿using Microsoft.AspNetCore.Mvc;
 
 namespace VendasWebMvc.Controllers;
 

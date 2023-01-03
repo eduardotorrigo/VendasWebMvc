@@ -1,18 +1,23 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using VendasWebMvc.Data;
 using VendasWebMvc.Models;
 
 namespace VendasWebMvc.Controllers;
 
 public class DepartmentsController : Controller
 {
+    private readonly ApplicationDbContext _context;
+
+    public DepartmentsController(ApplicationDbContext context)
+    {
+        _context = context;
+    }
+
     public IActionResult Index()
     {
-        List<Department> list = new List<Department>();
-        list.Add(new Department { Id = 1, Name = "Eletronicos" });
-        list.Add(new Department { Id = 1, Name = "Fashion" });
-        return View(list);
+        return View(_context.Departments.ToList());
     }
     public IActionResult Create()
     {

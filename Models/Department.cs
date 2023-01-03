@@ -9,7 +9,7 @@ public class Department
     public Department()
     {
     }
-    public Department(int id, string name, ICollection<Seller> sellers)
+    public Department(int id, string name)
     {
         Id = id;
         Name = name;

@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
-
-namespace VendasWebMvc.Controllers;
+﻿namespace VendasWebMvc.Controllers;
 
 public class HomeController : Controller
 {

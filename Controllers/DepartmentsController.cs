@@ -1,117 +1,100 @@
+using System.Diagnostics;
+using VendasWebMvc.Models.ViewModels;
 namespace VendasWebMvc.Controllers;
 
 public class DepartmentsController : Controller
 {
     private readonly ApplicationDbContext _context;
+    private readonly DepartmentService _departmentService;
 
-    public DepartmentsController(ApplicationDbContext context)
+    public DepartmentsController(ApplicationDbContext context, DepartmentService departmentService)
     {
         _context = context;
+        _departmentService = departmentService;
     }
 
-    public IActionResult Index()
+    public async Task<IActionResult> Index()
     {
-        return View(_context.Departments.ToList());
+        var result = await _departmentService.FindAll();
+        return View(result);
     }
     public IActionResult Create()
     {
         return View();
     }
     [HttpPost]
-    public IActionResult Create(Department dept)
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Create(Department dept)
     {
-        if (ModelState.IsValid)
-        {
-            try
-            {
-                _context.Add(dept);
-                _context.SaveChanges();
-            }
-            catch (System.Exception)
-            {
+        await _departmentService.Inserir(dept);
+        return RedirectToAction(nameof(Index));
 
-                throw;
-            }
-            return RedirectToAction(nameof(Index));
-        }
-        return View(dept);
     }
-    public IActionResult Delete(int? id)
+    public async Task<IActionResult> Delete(int? id)
     {
         if (id == null)
-            return NotFound();
+            return RedirectToAction(nameof(Error), new { message = "Id não fornecido" });
 
-        var result = _context.Departments.FirstOrDefault(d => d.Id == id);
+        var result = await _departmentService.FindById(id.Value);
         if (result == null)
-            return NotFound();
+            return RedirectToAction(nameof(Error), new { message = "Id não encontrado" });
+
+        return View(result);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Delete(int id)
+    {
+        await _departmentService.Remove(id);
+        return RedirectToAction(nameof(Index));
+    }
+    public async Task<IActionResult> Details(int? id)
+    {
+        if (id == null)
+            return RedirectToAction(nameof(Error), new { message = "Id não informado" });
+
+        var result = await _departmentService.FindById(id.Value);
+        if (result == null)
+            return RedirectToAction(nameof(Error), new { message = "Id não encontrado" });
+
+        return View(result);
+    }
+    public async Task<IActionResult> Edit(int? id)
+    {
+        if (id == null)
+            return RedirectToAction(nameof(Error), new { message = "Id não informado" });
+
+        var result = await _departmentService.FindById(id.Value);
+        if (result == null)
+            return RedirectToAction(nameof(Error), new { message = "Id não encontrado" });
 
         return View(result);
     }
     [HttpPost]
-    public IActionResult Delete(int id)
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Edit(int id, Department dept)
     {
-        if (id != null)
+        if (id != dept.Id)
+            return RedirectToAction(nameof(Error), new { message = "Id divergente" });
+        try
         {
-            var result = _context.Departments.Find(id);
-            if (result == null)
-                return NotFound();
-
-            try
-            {
-                _context.Remove(result);
-                _context.SaveChanges();
-
-
-            }
-            catch (System.Exception)
-            {
-
-                throw;
-            }
+            await _departmentService.Update(dept);
             return RedirectToAction(nameof(Index));
         }
-        return View();
-    }
-    public IActionResult Details(int? id)
-    {
-        if (id == null)
-            return NotFound();
-
-        var result = _context.Departments.FirstOrDefault(d => d.Id == id);
-        if (result == null)
-            return NotFound();
-
-        return View(result);
-    }
-    public IActionResult Edit(int? id)
-    {
-        if (id == null)
-            return NotFound();
-
-        var result = _context.Departments.FirstOrDefault(d => d.Id == id);
-        if (result == null)
-            return NotFound();
-
-        return View(result);
-    }
-    [HttpPost]
-    public IActionResult Edit(int? id, Department dept)
-    {
-        if (ModelState.IsValid)
+        catch (ApplicationException e)
         {
-            try
-            {
-                _context.Update(dept);
-                _context.SaveChanges();
-            }
-            catch (System.Exception)
-            {
 
-                throw;
-            }
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction(nameof(Error), new { message = e.Message });
         }
-        return View(dept);
     }
-
+    public IActionResult Error(string message)
+    {
+        var viewModel = new ErrorViewModel
+        {
+            Message = message,
+            RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier
+        };
+        return View(viewModel);
+    }
 }

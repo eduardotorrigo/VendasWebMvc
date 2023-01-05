@@ -1,5 +1,3 @@
-using Microsoft.EntityFrameworkCore;
-using VendasWebMvc.Models;
 using VendasWebMvc.Models.Enum;
 
 namespace VendasWebMvc.Data;

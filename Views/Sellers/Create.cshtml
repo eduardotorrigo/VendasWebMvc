@@ -1,12 +1,12 @@
 @model VendasWebMvc.Models.ViewModels.SellerViewModel
 
 @{
-    ViewData["Title"] = "Criar Novo";
+    ViewData["Title"] = "Vendedores";
 }
 
 <h2>@ViewData["Title"]</h2>
 
-<h4>Vendedor</h4>
+<h4>Criar novo</h4>
 <hr />
 <div class="row">
     <div class="col-md-4">
@@ -45,3 +45,7 @@
         </form>
     </div>
 </div>
+
+@section Scripts {
+@{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

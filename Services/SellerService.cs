@@ -9,33 +9,33 @@ public class SellerService
     {
         _context = context;
     }
-    public List<Seller> FindAll()
+    public async Task<List<Seller>> FindAll()
     {
-        return _context.Sellers.OrderBy(d => d.Name).ToList();
+        return await _context.Sellers.Include(s => s.Department).OrderBy(d => d.Name).ToListAsync();
     }
-    public void Insert(Seller obj)
+    public async Task Insert(Seller obj)
     {
         _context.Sellers.Add(obj);
-        _context.SaveChanges();
+        await _context.SaveChangesAsync();
     }
-    public Seller FindById(int id)
+    public async Task<Seller> FindById(int id)
     {
-        return _context.Sellers.Include(s => s.Department).FirstOrDefault(s => s.Id == id);
+        return await _context.Sellers.Include(s => s.Department).FirstOrDefaultAsync(s => s.Id == id);
     }
-    public void Delete(int id)
+    public async Task Delete(int id)
     {
         var result = _context.Sellers.Find(id);
         _context.Sellers.Remove(result);
-        _context.SaveChanges();
+        await _context.SaveChangesAsync();
     }
-    public void Update(Seller seller)
+    public async Task Update(Seller seller)
     {
-        if (!_context.Sellers.Any(s => s.Id == seller.Id))
+        if (!await _context.Sellers.AnyAsync(s => s.Id == seller.Id))
             throw new NotFoundException("Id não encontrado");
         try
         {
             _context.Sellers.Update(seller);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
         }
         catch (DbUpdateConcurrencyException e)
         {

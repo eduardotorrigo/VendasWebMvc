@@ -1,6 +1,5 @@
+using System.Diagnostics;
 using VendasWebMvc.Models.ViewModels;
-using VendasWebMvc.Services;
-using VendasWebMvc.Services.Exceptions;
 
 namespace VendasWebMvc.Controllers;
 
@@ -15,77 +14,96 @@ public class SellersController : Controller
         _departmentService = departmentService;
     }
 
-    public IActionResult Index()
+    public async Task<IActionResult> Index()
     {
-        var list = _sellerService.FindAll();
+        var list = await _sellerService.FindAll();
         return View(list);
     }
-    public IActionResult Create()
+    public async Task<IActionResult> Create()
     {
-        var department = _departmentService.FindAll();
+        var department = await _departmentService.FindAll();
         var viewModel = new SellerViewModel { Departments = department };
         return View(viewModel);
     }
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public IActionResult Create(Seller seller)
+    public async Task<IActionResult> Create(Seller seller)
     {
-        _sellerService.Insert(seller);
+        if (!ModelState.IsValid)//Caso o javascript não funcione
+        {
+            var department = await _departmentService.FindAll();
+            var viewModel = new SellerViewModel { Seller = seller, Departments = department };
+            return View(viewModel);
+        }
+
+        await _sellerService.Insert(seller);
         return RedirectToAction(nameof(Index));
     }
-    public IActionResult Delete(int? id)
+    public async Task<IActionResult> Delete(int? id)
     {
         if (id == null)
-            return NotFound();
-        var result = _sellerService.FindById(id.Value);
+            return RedirectToAction(nameof(Error), new { message = "Id não fornecido" });
+
+        var result = await _sellerService.FindById(id.Value);
+        if (result == null)
+            return RedirectToAction(nameof(Error), new { message = "Id não encontrado" });
         return View(result);
     }
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public IActionResult Delete(int id)
+    public async Task<IActionResult> Delete(int id)
     {
-        _sellerService.Delete(id);
+        await _sellerService.Delete(id);
         return RedirectToAction(nameof(Index));
     }
-    public IActionResult Details(int? id)
+    public async Task<IActionResult> Details(int? id)
     {
         if (id == null)
-            return NotFound();
-        var result = _sellerService.FindById(id.Value);
+            return RedirectToAction(nameof(Error), new { message = "Id não informado" });
+        var result = await _sellerService.FindById(id.Value);
         return View(result);
     }
-    public IActionResult Edit(int? id)
+    public async Task<IActionResult> Edit(int? id)
     {
-        var result = _sellerService.FindById(id.Value);
+        var result = await _sellerService.FindById(id.Value);
         if (result == null)
-            return NotFound();
+            return RedirectToAction(nameof(Error), new { message = "Id não encontrado" });
 
-        List<Department> department = _departmentService.FindAll();
+        List<Department> department = await _departmentService.FindAll();
         var viewModel = new SellerViewModel { Seller = result, Departments = department };
         return View(viewModel);
     }
     [HttpPost]
-    public IActionResult Edit(int id, Seller seller)
+    public async Task<IActionResult> Edit(int id, Seller seller)
     {
+        if (ModelState.IsValid)//Caso o javascript não funcione
+        {
+            var department = await _departmentService.FindAll();
+            var viewModel = new SellerViewModel { Seller = seller, Departments = department };
+            return View(viewModel);
+        }
 
         if (id != seller.Id)
-            return BadRequest();
+            return RedirectToAction(nameof(Error), new { message = "Id divergente" });
 
         try
         {
-            _sellerService.Update(seller);
+            await _sellerService.Update(seller);
             return RedirectToAction(nameof(Index));
         }
-        catch (NotFoundException)
+        catch (ApplicationException e)
         {
 
-            return NotFound();
+            return RedirectToAction(nameof(Error), new { message = e.Message });
         }
-        catch (DbConcurrencyException)
-        {
-            return BadRequest();
-        }
-
     }
-
+    public IActionResult Error(string message)
+    {
+        var viewModel = new ErrorViewModel
+        {
+            Message = message,
+            RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier
+        };
+        return View(viewModel);
+    }
 }
